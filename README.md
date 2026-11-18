@@ -106,10 +106,24 @@ when:
 - a request **times out** (`--timeout`);
 - a network-level error occurs (DNS failure, connection refused, reset, ...).
 
+## Testing
+
+Tests use Node's built-in test runner (`node:test`) — no extra framework —
+and run against a local loopback HTTP server:
+
+```bash
+npm test
+```
+
+They cover the unit formatting helpers, URL validation (`parseUrl`), a single
+`knock` (success, non-2xx, oversized response, stalled response, connection
+failure), and the `meterUrl` aggregation over multiple knocks.
+
 ## Development
 
 ```bash
 npm run typecheck   # strict TypeScript check
+npm test            # run the test suite
 npm run build       # compile to dist/
 npm run knock -- <url>
 ```
