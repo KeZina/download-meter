@@ -4,52 +4,59 @@ import {
   RequestTimeoutError,
   ResponseTooLargeError,
 } from "./errors.js";
-
-export interface KnockOptions {
-  url: URL;
-  timeoutMs: number;
-  maxBytes: number;
-}
-
-export interface KnockResult {
-  status: number;
-  bytes: number;
-  durationMs: number;
-}
+import type { KnockOptions, KnockResult } from "./types/index.js";
 
 export async function knock({ url, timeoutMs, maxBytes }: KnockOptions): Promise<KnockResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const startedAt = performance.now();
+
   try {
     const response = await fetch(url, {
       redirect: "follow",
       signal: controller.signal,
       headers: { "user-agent": "download-meter/1.0" },
     });
+
     const statusMs = performance.now() - startedAt;
+
     if (!response.ok) {
       throw new HttpStatusError(url.href, response.status, response.statusText);
     }
+
     if (!response.body) {
       return { status: response.status, bytes: 0, durationMs: statusMs };
     }
+
     let bytes = 0;
+
+    // Count real payload bytes instead of trusting Content-Length.
+    // Aborting mid-stream also fails oversized/malicious responses early.
     for await (const chunk of response.body) {
       bytes += chunk.byteLength;
+
       if (bytes > maxBytes) {
         controller.abort();
         throw new ResponseTooLargeError(url.href, maxBytes);
       }
     }
-    return { status: response.status, bytes, durationMs: performance.now() - startedAt };
+
+    return {
+      status: response.status,
+      bytes,
+      durationMs: performance.now() - startedAt,
+    };
   } catch (error) {
+    // Errors we created already describe the failure well enough; a timeout
+    // arrives as a generic AbortError, anything else is a network problem.
     if (isOwnError(error)) {
       throw error;
     }
+
     if (error instanceof Error && error.name === "AbortError") {
       throw new RequestTimeoutError(url.href, timeoutMs);
     }
+
     throw new NetworkError(url.href, error);
   } finally {
     clearTimeout(timer);

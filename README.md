@@ -1,5 +1,7 @@
 # download-meter
 
+English | [Русский](README.ru.md)
+
 A tiny Node.js (TypeScript) console tool that "knocks" on a URL — sends
 consecutive requests and waits for every response to fully download — and then
 reports the measured download speed.
@@ -21,7 +23,14 @@ npm install
 
 ## Launch
 
-Run directly from TypeScript sources with `tsx`:
+Run directly from TypeScript sources with `tsx` — with no arguments it
+knocks on the default target (`https://picsum.photos/1200/800`):
+
+```bash
+npm run knock
+```
+
+Or pass any custom URL:
 
 ```bash
 npm run knock -- https://picsum.photos/1200/800
@@ -31,19 +40,19 @@ Or build and run the compiled JavaScript:
 
 ```bash
 npm run build
+node dist/main.js            # default target
 node dist/main.js https://picsum.photos/1200/800
 ```
 
 ### Options
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `<url>` | (required) | Target to knock on, `http` or `https` only |
-| `-c, --count <n>` | `10` | Number of consecutive requests |
-| `-t, --timeout <ms>` | `15000` | Timeout per request in milliseconds |
-| `--max-size <bytes>` | `100000000` | Abort a single response larger than this many bytes |
-| `--allow-private` | off | Allow private/loopback hosts (e.g. `http://127.0.0.1:8000/img.jpg` for local testing) |
-| `-h, --help` | — | Show help |
+| Option               | Default                          | Description                                         |
+| -------------------- | -------------------------------- | --------------------------------------------------- |
+| `[url]`              | `https://picsum.photos/1200/800` | Target to knock on, `http` or `https` only          |
+| `-c, --count <n>`    | `10`                             | Number of consecutive requests                      |
+| `-t, --timeout <ms>` | `15000`                          | Timeout per request in milliseconds                 |
+| `--max-size <bytes>` | `100000000`                      | Abort a single response larger than this many bytes |
+| `-h, --help`         | —                                | Show help                                           |
 
 ### Example session
 
@@ -91,22 +100,40 @@ browser download readouts) are rated.
 The tool fails fast with a pretty `silly-logger` message and exit code `1`
 when:
 
-- the argument is not a valid absolute URL (or is missing);
+- the argument is not a valid absolute URL;
 - the URL does not use `http:` / `https:` (e.g. `file://`, `ftp://` — rejected);
-- the host resolves to a **private, loopback, link-local or other
-  non-public address**, which blocks requests to localhost/internal network
-  (a strict SSRF guard against malicious URLs). Use `--allow-private` only for
-  targets you trust, e.g. a local test server;
 - the server answers with a **non-2xx status** (e.g. 404, 500);
 - a response **exceeds `--max-size`** while streaming (guards against huge or
   decompression-bomb style payloads);
 - a request **times out** (`--timeout`);
 - a network-level error occurs (DNS failure, connection refused, reset, ...).
 
-## Development
+## Testing
+
+Tests use Node's built-in test runner (`node:test`) — no extra framework —
+and run against a local loopback HTTP server:
 
 ```bash
-npm run typecheck   # strict TypeScript check
-npm run build       # compile to dist/
+npm test
+```
+
+They cover the unit formatting helpers, URL validation (`parseUrl`), a single
+`knock` (success, non-2xx, oversized response, stalled response, connection
+failure), and the `meterUrl` aggregation over multiple knocks.
+
+## Development
+
+Code style is enforced by Prettier (`.prettierrc`, default style) while
+ESLint (`typescript-eslint` + `eslint-config-prettier`) checks code quality
+only, so the two tools never fight over formatting.
+
+```bash
+npm run format:check  # verify Prettier style
+npm run format        # reformat everything with Prettier
+npm run lint          # ESLint code-quality check
+npm run lint:fix      # auto-fix ESLint problems
+npm run typecheck     # strict TypeScript check
+npm test              # run the test suite
+npm run build         # compile to dist/
 npm run knock -- <url>
 ```
