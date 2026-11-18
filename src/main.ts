@@ -40,6 +40,7 @@ function parseCliOptions(): CliOptions {
   }
 
   const rawUrl = positionals[0] ?? DEFAULT_URL;
+
   return {
     url: parseUrl(rawUrl),
     count: parsePositiveInt(values.count, "--count"),
@@ -50,9 +51,11 @@ function parseCliOptions(): CliOptions {
 
 function parsePositiveInt(raw: string | boolean, flagName: string): number {
   const value = Number(raw);
+
   if (!Number.isInteger(value) || value <= 0) {
     throw new Error(`${flagName} must be a positive integer`);
   }
+
   return value;
 }
 
@@ -89,6 +92,7 @@ async function main(): Promise<void> {
   logger.info(`Knocking on ${options.url.href} ${options.count} times, one knock at a time...`);
 
   const wallStartedAt = performance.now();
+
   try {
     const summary = await meterUrl(
       {
@@ -123,6 +127,7 @@ async function main(): Promise<void> {
     );
   } catch (error) {
     const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+
     if (error instanceof RequestTimeoutError) {
       logger.error(`Knock failed - ${message} (adjust --timeout if the target is slow)`);
     } else {

@@ -11,6 +11,7 @@ export interface TestServer {
 export async function startTestServer(): Promise<TestServer> {
   const server = http.createServer((req, res) => {
     const path = req.url ?? "/";
+
     if (path === "/img") {
       res.writeHead(200, { "content-type": "application/octet-stream" });
       res.end(PAYLOAD);
@@ -28,7 +29,9 @@ export async function startTestServer(): Promise<TestServer> {
     }
   });
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
   const { port } = server.address() as AddressInfo;
+
   return {
     base: `http://127.0.0.1:${port}`,
     close: () => new Promise((resolve) => server.close(() => resolve())),
@@ -38,7 +41,10 @@ export async function startTestServer(): Promise<TestServer> {
 export async function startDeadServer(): Promise<string> {
   const server = http.createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+
   const { port } = server.address() as AddressInfo;
+
   await new Promise<void>((resolve) => server.close(() => resolve()));
+
   return `http://127.0.0.1:${port}`;
 }
