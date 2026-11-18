@@ -1,5 +1,7 @@
 # download-meter
 
+English | [Русский](README.ru.md)
+
 A tiny Node.js (TypeScript) console tool that "knocks" on a URL — sends
 consecutive requests and waits for every response to fully download — and then
 reports the measured download speed.
