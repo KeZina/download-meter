@@ -44,13 +44,13 @@ node dist/main.js https://picsum.photos/1200/800
 
 ### Options
 
-| Option | Default | Description |
-| --- | --- | --- |
-| `[url]` | `https://picsum.photos/1200/800` | Target to knock on, `http` or `https` only |
-| `-c, --count <n>` | `10` | Number of consecutive requests |
-| `-t, --timeout <ms>` | `15000` | Timeout per request in milliseconds |
-| `--max-size <bytes>` | `100000000` | Abort a single response larger than this many bytes |
-| `-h, --help` | — | Show help |
+| Option               | Default                          | Description                                         |
+| -------------------- | -------------------------------- | --------------------------------------------------- |
+| `[url]`              | `https://picsum.photos/1200/800` | Target to knock on, `http` or `https` only          |
+| `-c, --count <n>`    | `10`                             | Number of consecutive requests                      |
+| `-t, --timeout <ms>` | `15000`                          | Timeout per request in milliseconds                 |
+| `--max-size <bytes>` | `100000000`                      | Abort a single response larger than this many bytes |
+| `-h, --help`         | —                                | Show help                                           |
 
 ### Example session
 
@@ -121,9 +121,17 @@ failure), and the `meterUrl` aggregation over multiple knocks.
 
 ## Development
 
+Code style is enforced by Prettier (`.prettierrc`, default style) while
+ESLint (`typescript-eslint` + `eslint-config-prettier`) checks code quality
+only, so the two tools never fight over formatting.
+
 ```bash
-npm run typecheck   # strict TypeScript check
-npm test            # run the test suite
-npm run build       # compile to dist/
+npm run format:check  # verify Prettier style
+npm run format        # reformat everything with Prettier
+npm run lint          # ESLint code-quality check
+npm run lint:fix      # auto-fix ESLint problems
+npm run typecheck     # strict TypeScript check
+npm test              # run the test suite
+npm run build         # compile to dist/
 npm run knock -- <url>
 ```

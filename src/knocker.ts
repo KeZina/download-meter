@@ -6,11 +6,7 @@ import {
 } from "./errors.js";
 import type { KnockOptions, KnockResult } from "./types/index.js";
 
-export async function knock({
-  url,
-  timeoutMs,
-  maxBytes,
-}: KnockOptions): Promise<KnockResult> {
+export async function knock({ url, timeoutMs, maxBytes }: KnockOptions): Promise<KnockResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const startedAt = performance.now();
@@ -35,7 +31,11 @@ export async function knock({
         throw new ResponseTooLargeError(url.href, maxBytes);
       }
     }
-    return { status: response.status, bytes, durationMs: performance.now() - startedAt };
+    return {
+      status: response.status,
+      bytes,
+      durationMs: performance.now() - startedAt,
+    };
   } catch (error) {
     if (isOwnError(error)) {
       throw error;

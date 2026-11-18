@@ -7,16 +7,10 @@ export interface MeterOptions {
   maxBytes: number;
 }
 
-export type KnockListener = (
-  index: number,
-  count: number,
-  result: KnockResult,
-) => void;
+export type KnockListener = (index: number, count: number, result: KnockResult) => void;
 
 export interface MeterSummary {
-  url: string;
   count: number;
-  results: KnockResult[];
   totalBytes: number;
   totalDownloadTimeMs: number;
   totalWallTimeMs: number;

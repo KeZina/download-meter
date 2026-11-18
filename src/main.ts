@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 import logger from "silly-logger";
-import {
-  formatBytes,
-  formatDuration,
-  formatSpeed,
-  meterUrl,
-} from "./benchmark.js";
+import { formatBytes, formatDuration, formatSpeed, meterUrl } from "./benchmark.js";
 import { RequestTimeoutError } from "./errors.js";
 import { parseUrl } from "./guard.js";
 
@@ -29,7 +24,11 @@ function parseCliOptions(): CliOptions {
     allowPositionals: true,
     options: {
       count: { type: "string", short: "c", default: String(DEFAULT_COUNT) },
-      timeout: { type: "string", short: "t", default: String(DEFAULT_TIMEOUT_MS) },
+      timeout: {
+        type: "string",
+        short: "t",
+        default: String(DEFAULT_TIMEOUT_MS),
+      },
       "max-size": { type: "string", default: String(DEFAULT_MAX_SIZE_BYTES) },
       help: { type: "boolean", short: "h", default: false },
     },
@@ -87,9 +86,7 @@ async function main(): Promise<void> {
   }
 
   logger.startup("download-meter is warming up...");
-  logger.info(
-    `Knocking on ${options.url.href} ${options.count} times, one knock at a time...`,
-  );
+  logger.info(`Knocking on ${options.url.href} ${options.count} times, one knock at a time...`);
 
   const wallStartedAt = performance.now();
   try {
@@ -112,9 +109,7 @@ async function main(): Promise<void> {
     logger.info(
       `  Total downloaded : ${formatBytes(summary.totalBytes)} across ${summary.count} requests`,
     );
-    logger.info(
-      `  Average request time: ${formatDuration(summary.averageRequestTimeMs)}`,
-    );
+    logger.info(`  Average request time: ${formatDuration(summary.averageRequestTimeMs)}`);
     logger.info(`  Total wall time  : ${formatDuration(summary.totalWallTimeMs)}`);
     logger.info(
       `  Smallest / largest response: ${formatBytes(summary.smallestKnockBytes)} / ${formatBytes(summary.largestKnockBytes)}`,
@@ -127,12 +122,9 @@ async function main(): Promise<void> {
         `(${formatSpeed(summary.wallSpeedBytesPerSecond)} including per-request overhead)`,
     );
   } catch (error) {
-    const message =
-      error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     if (error instanceof RequestTimeoutError) {
-      logger.error(
-        `Knock failed - ${message} (adjust --timeout if the target is slow)`,
-      );
+      logger.error(`Knock failed - ${message} (adjust --timeout if the target is slow)`);
     } else {
       logger.crash(`Knock failed - ${message}`);
     }
@@ -140,21 +132,15 @@ async function main(): Promise<void> {
     return;
   }
 
-  logger.success(
-    `Done in ${formatDuration(performance.now() - wallStartedAt)}. Happy knocking!`,
-  );
+  logger.success(`Done in ${formatDuration(performance.now() - wallStartedAt)}. Happy knocking!`);
 }
 
 process.on("unhandledRejection", (reason) => {
-  logger.crash(
-    `Unhandled rejection: ${reason instanceof Error ? reason.message : String(reason)}`,
-  );
+  logger.crash(`Unhandled rejection: ${reason instanceof Error ? reason.message : String(reason)}`);
   process.exitCode = 1;
 });
 
 main().catch((error: unknown) => {
-  logger.crash(
-    `Fatal: ${error instanceof Error ? error.stack ?? error.message : String(error)}`,
-  );
+  logger.crash(`Fatal: ${error instanceof Error ? (error.stack ?? error.message) : String(error)}`);
   process.exitCode = 1;
 });

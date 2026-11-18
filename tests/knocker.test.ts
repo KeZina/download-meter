@@ -22,10 +22,13 @@ after(async () => {
   await closeServer();
 });
 
-function knockPath(path: string, overrides?: {
-  timeoutMs?: number;
-  maxBytes?: number;
-}) {
+function knockPath(
+  path: string,
+  overrides?: {
+    timeoutMs?: number;
+    maxBytes?: number;
+  },
+) {
   return knock({
     url: new URL(base + path),
     timeoutMs: overrides?.timeoutMs ?? 2_000,
@@ -44,16 +47,10 @@ describe("knock", () => {
     await assert.rejects(knockPath("/missing"), HttpStatusError);
   });
   it("aborts responses exceeding maxBytes with ResponseTooLargeError", async () => {
-    await assert.rejects(
-      knockPath("/img", { maxBytes: 1_000 }),
-      ResponseTooLargeError,
-    );
+    await assert.rejects(knockPath("/img", { maxBytes: 1_000 }), ResponseTooLargeError);
   });
   it("fails with RequestTimeoutError when the response stalls", async () => {
-    await assert.rejects(
-      knockPath("/slow", { timeoutMs: 200 }),
-      RequestTimeoutError,
-    );
+    await assert.rejects(knockPath("/slow", { timeoutMs: 200 }), RequestTimeoutError);
   });
   it("wraps connection failures in NetworkError", async () => {
     const deadBase = await startDeadServer();
