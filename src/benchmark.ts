@@ -24,6 +24,8 @@ export async function meterUrl(
   const totalDownloadTimeMs = results.reduce((sum, result) => sum + result.durationMs, 0);
   const averageRequestTimeMs = totalDownloadTimeMs / results.length;
 
+  // Average speed counts only time spent downloading; wall speed also counts
+  // the overhead between requests (connection setup, latency, idle gaps).
   const averageSpeedBytesPerSecond =
     totalDownloadTimeMs > 0 ? totalBytes / (totalDownloadTimeMs / 1000) : 0;
   const wallSpeedBytesPerSecond = totalWallTimeMs > 0 ? totalBytes / (totalWallTimeMs / 1000) : 0;
@@ -44,6 +46,7 @@ export async function meterUrl(
 }
 
 export function formatBytes(bytes: number): string {
+  // Decimal units: 1 KB = 1000 bytes, matching network speed ratings.
   if (!Number.isFinite(bytes) || bytes < 0) {
     return "0 B";
   }

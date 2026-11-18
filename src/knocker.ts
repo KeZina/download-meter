@@ -30,6 +30,8 @@ export async function knock({ url, timeoutMs, maxBytes }: KnockOptions): Promise
 
     let bytes = 0;
 
+    // Count real payload bytes instead of trusting Content-Length.
+    // Aborting mid-stream also fails oversized/malicious responses early.
     for await (const chunk of response.body) {
       bytes += chunk.byteLength;
 
@@ -45,6 +47,8 @@ export async function knock({ url, timeoutMs, maxBytes }: KnockOptions): Promise
       durationMs: performance.now() - startedAt,
     };
   } catch (error) {
+    // Errors we created already describe the failure well enough; a timeout
+    // arrives as a generic AbortError, anything else is a network problem.
     if (isOwnError(error)) {
       throw error;
     }

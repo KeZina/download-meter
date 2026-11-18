@@ -38,6 +38,7 @@ export async function startTestServer(): Promise<TestServer> {
   };
 }
 
+// Opens a port, then releases it, so a request to it fails with ECONNREFUSED.
 export async function startDeadServer(): Promise<string> {
   const server = http.createServer();
   await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
