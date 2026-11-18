@@ -12,6 +12,7 @@ import { meterUrl } from "./meter.js";
 
 logger.timeFormat("YYYY-MM-DD HH:mm:ss");
 
+const DEFAULT_URL = "https://picsum.photos/1200/800";
 const DEFAULT_COUNT = 10;
 const DEFAULT_TIMEOUT_MS = 15_000;
 const DEFAULT_MAX_SIZE_BYTES = 100_000_000;
@@ -36,9 +37,9 @@ function parseCliOptions(): CliOptions {
     },
   });
 
-  if (values.help || positionals.length === 0) {
-    printUsage(values.help ? undefined : "missing target URL");
-    process.exitCode = values.help ? 0 : 1;
+  if (values.help) {
+    printUsage();
+    process.exitCode = 0;
     process.exit(process.exitCode);
   }
 
@@ -46,7 +47,7 @@ function parseCliOptions(): CliOptions {
   const timeoutMs = parsePositiveInt(values.timeout, "--timeout");
   const maxSizeBytes = parsePositiveInt(values["max-size"], "--max-size");
   return {
-    url: positionals[0],
+    url: positionals[0] ?? DEFAULT_URL,
     count,
     timeoutMs,
     maxSizeBytes,
@@ -65,16 +66,14 @@ function parsePositiveInt(raw: string | boolean, flagName: string): number {
   return value;
 }
 
-function printUsage(error?: string): void {
-  if (error) {
-    logger.error(error);
-  }
+function printUsage(): void {
   logger.info(
     [
-      "Usage: npm run knock -- <url> [options]",
+      "Usage: npm run knock -- [url] [options]",
       "",
       "Arguments:",
-      "  <url>                 Target to knock on (http/https). Example: https://picsum.photos/1200/800",
+      "  [url]                 Target to knock on (http/https).",
+      `                        Default: ${DEFAULT_URL}`,
       "",
       "Options:",
       "  -c, --count <n>       Number of consecutive requests (default: 10)",
@@ -92,7 +91,8 @@ async function main(): Promise<void> {
     options = parseCliOptions();
   } catch (error) {
     if (error instanceof InvalidUrlError) {
-      printUsage(error.message);
+      printUsage();
+      logger.error(error.message);
     } else {
       logger.crash(`Unexpected CLI error: ${error instanceof Error ? error.message : String(error)}`);
     }

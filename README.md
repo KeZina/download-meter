@@ -21,7 +21,14 @@ npm install
 
 ## Launch
 
-Run directly from TypeScript sources with `tsx`:
+Run directly from TypeScript sources with `tsx` — with no arguments it
+knocks on the default target (`https://picsum.photos/1200/800`):
+
+```bash
+npm run knock
+```
+
+Or pass any custom URL:
 
 ```bash
 npm run knock -- https://picsum.photos/1200/800
@@ -31,6 +38,7 @@ Or build and run the compiled JavaScript:
 
 ```bash
 npm run build
+node dist/main.js            # default target
 node dist/main.js https://picsum.photos/1200/800
 ```
 
@@ -38,7 +46,7 @@ node dist/main.js https://picsum.photos/1200/800
 
 | Option | Default | Description |
 | --- | --- | --- |
-| `<url>` | (required) | Target to knock on, `http` or `https` only |
+| `[url]` | `https://picsum.photos/1200/800` | Target to knock on, `http` or `https` only |
 | `-c, --count <n>` | `10` | Number of consecutive requests |
 | `-t, --timeout <ms>` | `15000` | Timeout per request in milliseconds |
 | `--max-size <bytes>` | `100000000` | Abort a single response larger than this many bytes |
@@ -91,7 +99,7 @@ browser download readouts) are rated.
 The tool fails fast with a pretty `silly-logger` message and exit code `1`
 when:
 
-- the argument is not a valid absolute URL (or is missing);
+- the argument is not a valid absolute URL;
 - the URL does not use `http:` / `https:` (e.g. `file://`, `ftp://` — rejected);
 - the host resolves to a **private, loopback, link-local or other
   non-public address**, which blocks requests to localhost/internal network
