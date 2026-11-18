@@ -1,2 +1,2 @@
 export * from "./knock.js";
-export * from "./meter.js";
+export * from "./benchmark.js";
