@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 import { parseArgs } from "node:util";
 import logger from "silly-logger";
+import { InvalidUrlError, RequestTimeoutError } from "./errors.js";
 import {
-  InvalidUrlError,
-  RequestTimeoutError,
-  UnsafeHostError,
-} from "./errors.js";
-import { formatBytes, formatDuration, formatSpeed } from "./format.js";
-import { guardUrl, parseUrl } from "./guard.js";
-import { meterUrl } from "./meter.js";
+  formatBytes,
+  formatDuration,
+  formatSpeed,
+  meterUrl,
+} from "./benchmark.js";
+import { parseUrl } from "./guard.js";
 
 logger.timeFormat("YYYY-MM-DD HH:mm:ss");
 
@@ -22,7 +22,6 @@ interface CliOptions {
   count: number;
   timeoutMs: number;
   maxSizeBytes: number;
-  allowPrivate: boolean;
 }
 
 function parseCliOptions(): CliOptions {
@@ -32,7 +31,6 @@ function parseCliOptions(): CliOptions {
       count: { type: "string", short: "c", default: String(DEFAULT_COUNT) },
       timeout: { type: "string", short: "t", default: String(DEFAULT_TIMEOUT_MS) },
       "max-size": { type: "string", default: String(DEFAULT_MAX_SIZE_BYTES) },
-      "allow-private": { type: "boolean", default: false },
       help: { type: "boolean", short: "h", default: false },
     },
   });
@@ -51,7 +49,6 @@ function parseCliOptions(): CliOptions {
     count,
     timeoutMs,
     maxSizeBytes,
-    allowPrivate: values["allow-private"] === true,
   };
 }
 
@@ -79,7 +76,6 @@ function printUsage(): void {
       "  -c, --count <n>       Number of consecutive requests (default: 10)",
       "  -t, --timeout <ms>    Timeout per request in milliseconds (default: 15000)",
       "      --max-size <b>    Abort a response larger than this many bytes (default: 100000000)",
-      "      --allow-private   Allow private/loopback hosts (for testing against local servers)",
       "  -h, --help            Show this help",
     ].join("\n"),
   );
@@ -103,9 +99,6 @@ async function main(): Promise<void> {
   let url: URL;
   try {
     url = parseUrl(options.url);
-    if (!options.allowPrivate) {
-      await guardUrl(url);
-    }
   } catch (error) {
     logger.crash(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;
@@ -147,8 +140,6 @@ async function main(): Promise<void> {
     const message = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
     if (error instanceof RequestTimeoutError) {
       logger.error(`Knock failed - ${message} (adjust --timeout if the target is slow)`);
-    } else if (error instanceof UnsafeHostError) {
-      logger.error(`Knock rejected - ${message}`);
     } else {
       logger.crash(`Knock failed - ${message}`);
     }

@@ -50,7 +50,6 @@ node dist/main.js https://picsum.photos/1200/800
 | `-c, --count <n>` | `10` | Number of consecutive requests |
 | `-t, --timeout <ms>` | `15000` | Timeout per request in milliseconds |
 | `--max-size <bytes>` | `100000000` | Abort a single response larger than this many bytes |
-| `--allow-private` | off | Allow private/loopback hosts (e.g. `http://127.0.0.1:8000/img.jpg` for local testing) |
 | `-h, --help` | — | Show help |
 
 ### Example session
@@ -101,10 +100,6 @@ when:
 
 - the argument is not a valid absolute URL;
 - the URL does not use `http:` / `https:` (e.g. `file://`, `ftp://` — rejected);
-- the host resolves to a **private, loopback, link-local or other
-  non-public address**, which blocks requests to localhost/internal network
-  (a strict SSRF guard against malicious URLs). Use `--allow-private` only for
-  targets you trust, e.g. a local test server;
 - the server answers with a **non-2xx status** (e.g. 404, 500);
 - a response **exceeds `--max-size`** while streaming (guards against huge or
   decompression-bomb style payloads);

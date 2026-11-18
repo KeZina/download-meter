@@ -4,20 +4,13 @@ import {
   RequestTimeoutError,
   ResponseTooLargeError,
 } from "./errors.js";
+import type { KnockOptions, KnockResult } from "./types/index.js";
 
-export interface KnockOptions {
-  url: URL;
-  timeoutMs: number;
-  maxBytes: number;
-}
-
-export interface KnockResult {
-  status: number;
-  bytes: number;
-  durationMs: number;
-}
-
-export async function knock({ url, timeoutMs, maxBytes }: KnockOptions): Promise<KnockResult> {
+export async function knock({
+  url,
+  timeoutMs,
+  maxBytes,
+}: KnockOptions): Promise<KnockResult> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   const startedAt = performance.now();

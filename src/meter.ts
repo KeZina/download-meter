@@ -1,31 +1,10 @@
-import { knock, KnockResult } from "./knocker.js";
-
-export interface MeterOptions {
-  url: URL;
-  count: number;
-  timeoutMs: number;
-  maxBytes: number;
-}
-
-export interface MeterSummary {
-  url: string;
-  count: number;
-  results: KnockResult[];
-  totalBytes: number;
-  totalDownloadTimeMs: number;
-  totalWallTimeMs: number;
-  averageRequestTimeMs: number;
-  averageSpeedBytesPerSecond: number;
-  wallSpeedBytesPerSecond: number;
-  smallestKnockBytes: number;
-  largestKnockBytes: number;
-}
-
-export type KnockListener = (
-  index: number,
-  count: number,
-  result: KnockResult,
-) => void;
+import { knock } from "./knocker.js";
+import type {
+  KnockListener,
+  KnockResult,
+  MeterOptions,
+  MeterSummary,
+} from "./types/index.js";
 
 export async function meterUrl(
   options: MeterOptions,
